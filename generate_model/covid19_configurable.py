@@ -11,10 +11,13 @@ from tensorflow.random import set_seed
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications.mobilenet import *
+from tensorflow.keras.applications.mobilenet import MobileNet
+from tensorflow.keras.applications.mobilenet import preprocess_input as preprocess_input_v1
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input as preprocess_input_v2
 from tensorflow.keras.applications.efficientnet import *
 
-def create_sets(path, positive, negative, model_name, model, train_test_divide):
+def create_sets(path, positive, negative, model_name, model_version, model, train_test_divide):
   files_covid= os.listdir(path)
   total_files = len(files_covid)
   print ('Total files in disk:', total_files)
@@ -132,7 +135,10 @@ def create_sets(path, positive, negative, model_name, model, train_test_divide):
     img = image.load_img(path+filename, target_size=(base_model.layers[0].input_shape[0][1], base_model.layers[0].input_shape[0][2]))
     x = image.img_to_array(img)
     if (model_name == "mobilenet"):
-        x = preprocess_input(x) #mobilenet
+        if (model_version == 'V1'):
+          x = preprocess_input_v1(x) #mobilenet v1
+        elif (model_version == 'V2'):
+          x = preprocess_input_v2(x) #mobilenet v2
     X_train.append(x)
   #sanity check
   print('Sanity check...')
@@ -161,7 +167,10 @@ def create_sets(path, positive, negative, model_name, model, train_test_divide):
     img = image.load_img(path+filename, target_size=(base_model.layers[0].input_shape[0][1], base_model.layers[0].input_shape[0][2]))
     x = image.img_to_array(img)
     if (model_name == "mobilenet"):
-        x = preprocess_input(x) #mobilenet
+        if (model_version == 'V1'):
+          x = preprocess_input_v1(x) #mobilenet v1
+        elif (model_version == 'V2'):
+          x = preprocess_input_v2(x) #mobilenet v2
     X_val.append(x)
 
   #sanity check
@@ -183,7 +192,7 @@ def create_sets(path, positive, negative, model_name, model, train_test_divide):
   print(y_val.shape)
   return X_train, y_train, X_val, y_val
 
-def create_sets_by_patients(path, positive, negative, model_name, model, train_test_divide):
+def create_sets_by_patients(path, positive, negative, model_name, model_version, model, train_test_divide):
   files_covid= os.listdir(path)
   total_files = len(files_covid)
   print ('Total files in disk:', total_files)
@@ -222,7 +231,10 @@ def create_sets_by_patients(path, positive, negative, model_name, model, train_t
     img = image.load_img(path+filename, target_size=(base_model.layers[0].input_shape[0][1], base_model.layers[0].input_shape[0][2]))
     x = image.img_to_array(img)
     if (model_name == "mobilenet"):
-        x = preprocess_input(x) #mobilenet
+        if (model_version == 'V1'):
+          x = preprocess_input_v1(x) #mobilenet v1
+        elif (model_version == 'V2'):
+          x = preprocess_input_v2(x) #mobilenet v2
     X_train.append(x)
     X_train_names.append(filename)
   #sanity check
@@ -256,7 +268,10 @@ def create_sets_by_patients(path, positive, negative, model_name, model, train_t
     img = image.load_img(path+filename, target_size=(base_model.layers[0].input_shape[0][1], base_model.layers[0].input_shape[0][2]))
     x = image.img_to_array(img)
     if (model_name == "mobilenet"):
-        x = preprocess_input(x) #mobilenet
+        if (model_version == 'V1'):
+          x = preprocess_input_v1(x) #mobilenet v1
+        elif (model_version == 'V2'):
+          x = preprocess_input_v2(x) #mobilenet v2
     X_val.append(x)
     X_val_names.append(filename)
 
@@ -291,11 +306,11 @@ if __name__ == '__main__':
                         default='mobilenet',
                         nargs="?",
                         help="Model: mobilenet or efficientnet.")
-    parser.add_argument("--efficient_net_scaling",
+    parser.add_argument("--model_version",
                         type=str,
-                        default='B0',
+                        default='V1',
                         nargs="?",
-                        help="Efficient net scaling: B0, B1, B2, B3, B4, B5, B6 or B7.")
+                        help="Mobile net version: V1 or V2. Efficient net scaling: B0, B1, B2, B3, B4, B5, B6 or B7.")
     parser.add_argument("--dataset_path",
                         type=str,
                         default='/croppedi2p0/',
@@ -326,6 +341,11 @@ if __name__ == '__main__':
                         default=300,
                         nargs="?",
                         help="Steps per epoch value")
+    parser.add_argument("--use_steps_per_epoch",
+                        type=int,
+                        default=0,
+                        nargs="?",
+                        help="Use steps per epoch value: 1 use, other not use. Default 0.")
     parser.add_argument("--optimizer",
                         type=str,
                         default='adam',
@@ -348,9 +368,9 @@ if __name__ == '__main__':
                         help="Label dataset 1: N1, B1, M1, S1, C1, P1.")
     parser.add_argument("--strategy",
                         type=str,
-                        default='normal',
+                        default='combined',
                         nargs="?",
-                        help="Create sets strategy 1: normal or patients.")
+                        help="Create sets strategy: combined or by_patients.")
     parser.add_argument("--random_seed",
                         type=int,
                         default=12345,
@@ -369,23 +389,26 @@ if __name__ == '__main__':
 
     # get the model without the denses
     if (args.model == 'mobilenet'):
-      base_model = MobileNet(weights='imagenet', include_top='false')
+      if (args.model_version == 'V1'):
+        base_model = MobileNet(weights='imagenet', include_top='false')
+      elif (args.model_version == 'V2'):
+        base_model = MobileNetV2(weights='imagenet', include_top='false')
     elif (args.model == 'efficientnet'):
-      if args.efficient_net_scaling == 'B0':
+      if args.model_version == 'B0':
         base_model = EfficientNetB0(weights='imagenet', include_top='false')
-      if args.efficient_net_scaling == 'B1':
+      if args.model_version == 'B1':
         base_model = EfficientNetB1(weights='imagenet', include_top='false')
-      if args.efficient_net_scaling == 'B2':
+      if args.model_version == 'B2':
         base_model = EfficientNetB2(weights='imagenet', include_top='false')
-      if args.efficient_net_scaling == 'B3':
+      if args.model_version == 'B3':
         base_model = EfficientNetB3(weights='imagenet', include_top='false')
-      if args.efficient_net_scaling == 'B4':
+      if args.model_version == 'B4':
         base_model = EfficientNetB4(weights='imagenet', include_top='false')
-      if args.efficient_net_scaling == 'B5':
+      if args.model_version == 'B5':
         base_model = EfficientNetB5(weights='imagenet', include_top='false')
-      if args.efficient_net_scaling == 'B6':
+      if args.model_version == 'B6':
         base_model = EfficientNetB6(weights='imagenet', include_top='false')
-      if args.efficient_net_scaling == 'B7':
+      if args.model_version == 'B7':
         base_model = EfficientNetB7(weights='imagenet', include_top='false')
     new_dense = base_model.output
 
@@ -403,32 +426,34 @@ if __name__ == '__main__':
 
     # get the data
     print('***** Load files...')
-    if args.strategy == 'normal':
+    if args.strategy == 'combined':
       X_train, y_train, X_val, y_val = create_sets(args.dataset_path,
         args.label_dataset_zero,
         args.label_dataset_one,
         args.model,
+        args.model_version,
         base_model,
         args.train_test_divide)
-    else:
+    elif args.strategy == 'by_patients':
       X_train, y_train, X_val, y_val = create_sets_by_patients(args.dataset_path,
         args.label_dataset_zero,
         args.label_dataset_one,
         args.model,
+        args.model_version,
         base_model,
         args.train_test_divide)
     
     # fit model
-    results = model.fit(X_train, y_train, epochs=args.epochs, steps_per_epoch=args.steps_per_epoch, batch_size=args.batch_size, validation_data=(X_val, y_val))
+    if (args.use_steps_per_epoch == 1):
+      results = model.fit(X_train, y_train, epochs=args.epochs, steps_per_epoch=args.steps_per_epoch, batch_size=args.batch_size, validation_data=(X_val, y_val))
+    else:
+      results = model.fit(X_train, y_train, epochs=args.epochs, batch_size=args.batch_size, validation_data=(X_val, y_val))
 
     print('#' * 40)
     print("Finished! Saving model")
 
     # save model
-    if (args.model == "efficientnet"):
-      model.save(args.results_path + 'covid19_model_' + args.model + args.efficient_net_scaling)
-    else:
-      model.save(args.results_path + 'covid19_model_' + args.model)
+    model.save(args.results_path + 'covid19_model_' + args.model + args.model_version)
 
     print('#' * 40)
     print("Model saved!")
