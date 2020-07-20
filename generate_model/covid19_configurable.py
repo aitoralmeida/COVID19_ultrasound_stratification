@@ -17,6 +17,9 @@ from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input as preprocess_input_v2
 from tensorflow.keras.applications.efficientnet import *
 
+#TODO add to args
+TEST_SET_PATIENTS = ['04_','09_','18_','21_','27_','36_','38_','41_','51_','55_','59_','60_']
+
 def create_sets(path, positive, negative, model_name, model_version, model, train_test_divide):
   files_covid= os.listdir(path)
   total_files = len(files_covid)
@@ -383,9 +386,6 @@ if __name__ == '__main__':
     np.random.seed(args.random_seed)
     seed(args.random_seed)
     set_seed(args.random_seed)
-
-    #TODO add to args
-    TEST_SET_PATIENTS = ['04_','09_','18_','21_','27_','36_','38_','41_','51_','55_','59_','60_']
 
     # get the model without the denses
     if (args.model == 'mobilenet'):
