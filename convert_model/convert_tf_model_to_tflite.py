@@ -2,18 +2,13 @@ import tensorflow as tf
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model",
+parser.add_argument("--model_name",
                     type=str,
-                    default='mobilenet',
+                    default='covid19_model_mobilenetV1_for_N0_N1',
                     nargs="?",
-                    help="Model: mobilenet or efficientnet.")
-parser.add_argument("--model_version",
-                    type=str,
-                    default='V1',
-                    nargs="?",
-                    help="Mobile net version: V1 or V2. Efficient net scaling: B0, B1, B2, B3, B4, B5, B6 or B7.")
+                    help="Model's folder fullname")
 args = parser.parse_args()
 
-converter = tf.lite.TFLiteConverter.from_saved_model('/results/covid19_model_' + args.model + args.model_version)
+converter = tf.lite.TFLiteConverter.from_saved_model('/results/' + args.model_name)
 tflite_model = converter.convert()
-open('/results/covid19_model_' + args.model + args.model_version + '.tflite', 'wb').write(tflite_model)
+open('/results/' + args.model_name + '.tflite', 'wb').write(tflite_model)

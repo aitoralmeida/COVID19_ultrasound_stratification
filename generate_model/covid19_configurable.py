@@ -135,7 +135,7 @@ def create_sets(path, positive, negative, model_name, model_version, model, trai
       y_train.append([0,1])
     else: #wrong filename
       fail_train.append(filename)
-    img = image.load_img(path+filename, target_size=(base_model.layers[0].input_shape[0][1], base_model.layers[0].input_shape[0][2]))
+    img = image.load_img(path+filename, target_size=(model.layers[0].input_shape[0][1], model.layers[0].input_shape[0][2]))
     x = image.img_to_array(img)
     if (model_name == "mobilenet"):
         if (model_version == 'V1'):
@@ -143,6 +143,7 @@ def create_sets(path, positive, negative, model_name, model_version, model, trai
         elif (model_version == 'V2'):
           x = preprocess_input_v2(x) #mobilenet v2
     X_train.append(x)
+    X_train_names.append(filename)
   #sanity check
   print('Sanity check...')
   print('X_train total:', len(X_train))
@@ -167,7 +168,7 @@ def create_sets(path, positive, negative, model_name, model_version, model, trai
       y_val.append([0,1])
     else: #wrong filename
       fail_val.append(filename)
-    img = image.load_img(path+filename, target_size=(base_model.layers[0].input_shape[0][1], base_model.layers[0].input_shape[0][2]))
+    img = image.load_img(path+filename, target_size=(model.layers[0].input_shape[0][1], model.layers[0].input_shape[0][2]))
     x = image.img_to_array(img)
     if (model_name == "mobilenet"):
         if (model_version == 'V1'):
@@ -175,6 +176,7 @@ def create_sets(path, positive, negative, model_name, model_version, model, trai
         elif (model_version == 'V2'):
           x = preprocess_input_v2(x) #mobilenet v2
     X_val.append(x)
+    X_val_names.append(filename)
 
   #sanity check
   print('Sanity check...')
@@ -193,7 +195,7 @@ def create_sets(path, positive, negative, model_name, model_version, model, trai
   print('Shapes val')
   print(X_val.shape)
   print(y_val.shape)
-  return X_train, y_train, X_val, y_val
+  return X_train, y_train, X_train_names, X_val, y_val, X_val_names
 
 def create_sets_by_patients(path, positive, negative, model_name, model_version, model, train_test_divide):
   files_covid= os.listdir(path)
@@ -231,7 +233,7 @@ def create_sets_by_patients(path, positive, negative, model_name, model_version,
       y_train.append([0,1])
     else: #wrong filename
       fail_train.append(filename)
-    img = image.load_img(path+filename, target_size=(base_model.layers[0].input_shape[0][1], base_model.layers[0].input_shape[0][2]))
+    img = image.load_img(path+filename, target_size=(model.layers[0].input_shape[0][1], model.layers[0].input_shape[0][2]))
     x = image.img_to_array(img)
     if (model_name == "mobilenet"):
         if (model_version == 'V1'):
@@ -268,7 +270,7 @@ def create_sets_by_patients(path, positive, negative, model_name, model_version,
       test_neg_total += 1
     else: #wrong filename
       fail_val.append(filename)
-    img = image.load_img(path+filename, target_size=(base_model.layers[0].input_shape[0][1], base_model.layers[0].input_shape[0][2]))
+    img = image.load_img(path+filename, target_size=(model.layers[0].input_shape[0][1], model.layers[0].input_shape[0][2]))
     x = image.img_to_array(img)
     if (model_name == "mobilenet"):
         if (model_version == 'V1'):
@@ -299,7 +301,7 @@ def create_sets_by_patients(path, positive, negative, model_name, model_version,
   print('Shapes val')
   print(X_val.shape)
   print(y_val.shape)
-  return X_train, y_train, X_val, y_val
+  return X_train, y_train, X_train_names, X_val, y_val, X_val_names
 
 if __name__ == '__main__':
     # parsing arguments
@@ -427,21 +429,24 @@ if __name__ == '__main__':
     # get the data
     print('***** Load files...')
     if args.strategy == 'combined':
-      X_train, y_train, X_val, y_val = create_sets(args.dataset_path,
+      X_train, y_train, X_train_names, X_val, y_val, X_val_names = create_sets(args.dataset_path,
         args.label_dataset_zero,
         args.label_dataset_one,
         args.model,
         args.model_version,
-        base_model,
+        model,
         args.train_test_divide)
     elif args.strategy == 'by_patients':
-      X_train, y_train, X_val, y_val = create_sets_by_patients(args.dataset_path,
+      X_train, y_train, X_train_names, X_val, y_val, X_val_names = create_sets_by_patients(args.dataset_path,
         args.label_dataset_zero,
         args.label_dataset_one,
         args.model,
         args.model_version,
-        base_model,
+        model,
         args.train_test_divide)
+
+    for img_val_name  in X_val_names:
+      print(img_val_name)
     
     # fit model
     if (args.use_steps_per_epoch == 1):
@@ -453,7 +458,8 @@ if __name__ == '__main__':
     print("Finished! Saving model")
 
     # save model
-    model.save(args.results_path + 'covid19_model_' + args.model + args.model_version)
+    model.save(args.results_path + 'covid19_model_' 
+      + args.model + args.model_version + "_for_" + args.label_dataset_zero + "_" + args.label_dataset_one)
 
     print('#' * 40)
     print("Model saved!")

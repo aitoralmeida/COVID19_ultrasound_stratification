@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# docker volumes data
+_data/
+
+# dataset
+croppedi2p0.zip
+croppedi2p0/
