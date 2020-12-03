@@ -416,8 +416,9 @@ if __name__ == '__main__':
     last_layer = base_model.layers[-1]
     
     new_top_layer_global_avg_pooling = GlobalAveragePooling2D()(last_layer.output)
-    new_top_layer = Dense(2)(new_top_layer_global_avg_pooling)
-    model = Model(base_model.input, new_top_layer)
+    new_dense = Dense(1024, activation='relu')(new_top_layer_global_avg_pooling)
+    predictions = Dense(2, activation='softmax')(new_dense)
+    model = Model(base_model.input, predictions)
 
     # we will only train the new denses for the baseline
     for layer in base_model.layers:

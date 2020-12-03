@@ -403,7 +403,7 @@ if __name__ == '__main__':
     if (args.use_steps_per_epoch == 1):
       results = model.fit(X_train, y_train, epochs=args.epochs, steps_per_epoch=args.steps_per_epoch, batch_size=args.batch_size, validation_data=(X_val, y_val))
     else:
-      results = model.fit(X_train, y_train, epochs=args.epochs, steps_per_epoch=args.steps_per_epoch, batch_size=args.batch_size, validation_data=(X_val, y_val))
+      results = model.fit(X_train, y_train, epochs=args.epochs, batch_size=args.batch_size, validation_data=(X_val, y_val))
 
     print('#' * 40)
     print("Finished! Saving model")
