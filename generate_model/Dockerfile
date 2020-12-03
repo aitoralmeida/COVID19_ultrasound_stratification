@@ -15,7 +15,7 @@ RUN pip3 install -U matplotlib
 RUN pip3 install -U networkx
 RUN pip3 install -U sklearn
 RUN pip3 install -U keras
-RUN pip3 install -U tf-nightly imutils
+RUN pip3 install -U tensorflow==2.3.0 imutils
 RUN pip3 install -U Pillow
 RUN pip3 install -U opencv-python
 

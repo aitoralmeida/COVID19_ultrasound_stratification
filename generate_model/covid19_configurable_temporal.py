@@ -272,7 +272,7 @@ if __name__ == '__main__':
                         help="Batch size value")
     parser.add_argument("--steps_per_epoch",
                         type=int,
-                        default=300,
+                        default=44,
                         nargs="?",
                         help="Steps per epoch value")
     parser.add_argument("--use_steps_per_epoch",
