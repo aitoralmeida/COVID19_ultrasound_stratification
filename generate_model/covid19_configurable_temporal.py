@@ -267,7 +267,7 @@ if __name__ == '__main__':
                         help="Epochs value between 1 and infinite")
     parser.add_argument("--batch_size",
                         type=int,
-                        default=1,
+                        default=32,
                         nargs="?",
                         help="Batch size value")
     parser.add_argument("--steps_per_epoch",
