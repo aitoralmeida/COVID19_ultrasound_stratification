@@ -195,7 +195,7 @@ def create_sets(path, positive, negative, model_name, model_version, IMG_SIZE, M
           y_val.append([1,0])
         elif negative in filename:
           y_val.append([0,1])
-      img = image.load_img(path+filename, target_size=(IMG_SIZE, IMG_SIZE))
+      img = image.load_img(path+filename, target_size=(IMG_SIZE, IMG_SIZE, CHANNELS))
       x = image.img_to_array(img)
       if (model_name == "mobilenet"):
           if (model_version == 'V1'):
