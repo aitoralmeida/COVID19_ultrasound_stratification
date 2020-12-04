@@ -15,13 +15,16 @@ RUN pip3 install -U matplotlib
 RUN pip3 install -U networkx
 RUN pip3 install -U sklearn
 RUN pip3 install -U keras
-RUN pip3 install -U tf-nightly imutils
+RUN pip3 install -U tensorflow==2.3.0 imutils
 RUN pip3 install -U Pillow
 RUN pip3 install -U opencv-python
 
 RUN ["mkdir", "results"]
+RUN ["mkdir", "lus_stratification"]
+RUN ["mkdir", "lus_stratification/generate_model"]
 
-COPY ["covid19_configurable.py", "/"]
-COPY ["croppedi2p0", "/croppedi2p0"]
+COPY ["covid19_configurable.py", "/lus_stratification/generate_model/"]
+COPY ["covid19_configurable_temporal.py", "/lus_stratification/generate_model/"]
+COPY ["croppedi2p0", "/lus_stratification/generate_model/croppedi2p0"]
 
 VOLUME /results

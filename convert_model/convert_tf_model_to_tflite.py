@@ -9,6 +9,6 @@ parser.add_argument("--model_name",
                     help="Model's folder fullname")
 args = parser.parse_args()
 
-converter = tf.lite.TFLiteConverter.from_saved_model('/results/' + args.model_name)
+converter = tf.lite.TFLiteConverter.from_saved_model('/lus_stratification/convert_model/results/' + args.model_name)
 tflite_model = converter.convert()
-open('/results/' + args.model_name + '.tflite', 'wb').write(tflite_model)
+open('/lus_stratification/convert_model/results/' + args.model_name + '.tflite', 'wb').write(tflite_model)
