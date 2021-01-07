@@ -319,7 +319,7 @@ if __name__ == '__main__':
     set_seed(args.random_seed)
 
     # images params
-    MAX_FRAMES = 200
+    MAX_FRAMES = 5
     IMG_SIZE = 224
     CHANNELS = 3
 
