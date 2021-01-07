@@ -134,3 +134,6 @@ _data/
 # dataset
 croppedi2p0.zip
 croppedi2p0/
+
+# results (models, data...)
+*results
